@@ -20,7 +20,7 @@ Clone this repository directly to your `.config` directory (or symlink it):
 
 ```bash
 # Clone to ~/.config/ags
-git clone <repository-url> ~/.config/ags
+git clone https://github.com/s4lt1f0l/ags-bar.git ~/.config/ags
 cd ~/.config/ags
 
 # Install TypeScript type definitions and tooling
