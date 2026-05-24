@@ -13,7 +13,9 @@ export function Clock() {
       >
         <label label={formattedTime} />
         <popover>
-          <Gtk.Calendar />
+          <box class="calendar-popover-box">
+            <Gtk.Calendar />
+          </box>
         </popover>
       </menubutton>
     </box>

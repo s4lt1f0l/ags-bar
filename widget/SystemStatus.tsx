@@ -551,7 +551,7 @@ export function SystemStatus() {
               onClicked={() => execAsync(["systemctl", "poweroff"]).catch(console.error)}
             >
               <box spacing={8} valign={Gtk.Align.CENTER}>
-                <label label="" css="color: #ff7a7a;" />
+                <label label="" class="power-icon shutdown" />
                 <label label="Shut Down" hexpand halign={Gtk.Align.START} class="sys-text" />
               </box>
             </button>
@@ -560,7 +560,7 @@ export function SystemStatus() {
               onClicked={() => execAsync(["systemctl", "reboot"]).catch(console.error)}
             >
               <box spacing={8} valign={Gtk.Align.CENTER}>
-                <label label="" css="color: #fb923c;" />
+                <label label="" class="power-icon reboot" />
                 <label label="Restart" hexpand halign={Gtk.Align.START} class="sys-text" />
               </box>
             </button>
@@ -569,7 +569,7 @@ export function SystemStatus() {
               onClicked={() => execAsync(["systemctl", "suspend"]).catch(console.error)}
             >
               <box spacing={8} valign={Gtk.Align.CENTER}>
-                <label label="" css="color: #a78bfa;" />
+                <label label="" class="power-icon suspend" />
                 <label label="Sleep" hexpand halign={Gtk.Align.START} class="sys-text" />
               </box>
             </button>
@@ -578,7 +578,7 @@ export function SystemStatus() {
               onClicked={() => execAsync(["hyprctl", "dispatch", "exit"]).catch(console.error)}
             >
               <box spacing={8} valign={Gtk.Align.CENTER}>
-                <label label="󰍃" css="color: #34d399;" />
+                <label label="󰍃" class="power-icon logout" />
                 <label label="Log Out" hexpand halign={Gtk.Align.START} class="sys-text" />
               </box>
             </button>
