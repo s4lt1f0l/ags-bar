@@ -23,6 +23,7 @@ interface VolumeInfo {
 interface BatteryInfo {
   capacity: number
   status: string
+  isPlugged: boolean
 }
 
 interface PowerProfile {
@@ -197,32 +198,45 @@ export function SystemStatus() {
   })
 
   const batteryInfo = createPoll<BatteryInfo>(
-    { capacity: 100, status: "Unknown" },
+    { capacity: 100, status: "Unknown", isPlugged: false },
     5000,
     async () => {
       try {
         const cap = await execAsync([
-          "cat",
-          "/sys/class/power_supply/BAT1/capacity",
+          "sh",
+          "-c",
+          "cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -n 1",
         ])
         const stat = await execAsync([
-          "cat",
-          "/sys/class/power_supply/BAT1/status",
+          "sh",
+          "-c",
+          "cat /sys/class/power_supply/BAT*/status 2>/dev/null | head -n 1",
         ])
+        let isPlugged = false
+        try {
+          const ac = await execAsync([
+            "sh",
+            "-c",
+            "cat /sys/class/power_supply/*/online 2>/dev/null",
+          ])
+          isPlugged = ac.split("\n").some((val) => val.trim() === "1")
+        } catch {}
+
         return {
           capacity: parseInt(cap.trim()) || 0,
           status: stat.trim(),
+          isPlugged,
         }
       } catch {}
 
-      return { capacity: 100, status: "Unknown" }
+      return { capacity: 100, status: "Unknown", isPlugged: false }
     },
   )
 
   const batteryIcon = createComputed(() => {
     const info = batteryInfo()
     const cap = info.capacity
-    const isCharging = info.status === "Charging"
+    const isCharging = info.status === "Charging" || info.isPlugged
 
     if (isCharging) return ""
     if (cap > 80) return ""
@@ -235,15 +249,16 @@ export function SystemStatus() {
   const batteryClass = createComputed(() => {
     const info = batteryInfo()
     const classes = ["status-item", "battery"]
-    if (info.status === "Charging") classes.push("charging")
-    if (info.capacity <= 15) classes.push("low")
+    const isCharging = info.status === "Charging" || info.isPlugged
+    if (isCharging) classes.push("charging")
+    if (info.capacity <= 15 && !isCharging) classes.push("low")
     return classes.join(" ")
   })
 
   return (
     <box class="sys-status-group" valign={Gtk.Align.CENTER} spacing={8}>
-      <menubutton class={wifiClass} tooltipText={wifiTooltip}>
-        <label label={wifiIcon} />
+      <menubutton class={wifiClass} tooltipText={wifiTooltip} alwaysShowArrow={false}>
+        <label label={wifiIcon} halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER} />
         <popover>
           <box
             orientation={Gtk.Orientation.VERTICAL}
@@ -256,7 +271,7 @@ export function SystemStatus() {
                 label="Wi-Fi Networks"
                 hexpand
                 halign={Gtk.Align.START}
-                css="font-weight: bold; font-size: 14px;"
+                class="sys-title"
               />
               <switch
                 active={wifiEnabled}
@@ -283,13 +298,13 @@ export function SystemStatus() {
             {/* Placeholders */}
             <label
               label="Wi-Fi is disabled"
-              css="color: #94a3b8; padding: 8px;"
+              class="sys-text-muted"
               visible={createComputed(() => !wifiEnabled())}
             />
 
             <label
               label="Scanning..."
-              css="color: #94a3b8; padding: 8px;"
+              class="sys-text-muted"
               visible={createComputed(
                 () => wifiEnabled() && wifiNetworks().length === 0,
               )}
@@ -332,6 +347,7 @@ export function SystemStatus() {
                             label={ap.ssid}
                             hexpand
                             halign={Gtk.Align.START}
+                            class="sys-text"
                           />
                           <label
                             label=""
@@ -352,6 +368,9 @@ export function SystemStatus() {
                 if (!ap) return <box />
                 const isSecured =
                   ap.security && ap.security !== "" && ap.security !== "none"
+                const isConnected = createComputed(
+                  () => wifiInfo().ssid === ap.ssid && wifiInfo().connected,
+                )
                 return (
                   <box
                     orientation={Gtk.Orientation.VERTICAL}
@@ -359,9 +378,9 @@ export function SystemStatus() {
                     css="background: rgba(255, 255, 255, 0.05); padding: 8px; border-radius: 6px;"
                   >
                     <label
-                      label={`Connect to ${ap.ssid}`}
-                      css="font-weight: 500;"
+                      label={createComputed(() => isConnected() ? `Connected to ${ap.ssid}` : `Connect to ${ap.ssid}`)}
                       halign={Gtk.Align.START}
+                      class="sys-text font-medium"
                     />
 
                     {isSecured && (
@@ -369,6 +388,7 @@ export function SystemStatus() {
                         placeholderText="Password..."
                         visibility={false}
                         onNotifyText={(self) => setPassword(self.text)}
+                        visible={createComputed(() => !isConnected())}
                       />
                     )}
 
@@ -379,8 +399,25 @@ export function SystemStatus() {
                         onClicked={() => setSelectedAp(null)}
                       />
                       <button
+                        class="wifi-dialog-btn disconnect"
+                        label="Disconnect"
+                        visible={isConnected}
+                        onClicked={async () => {
+                          setStatusText("Disconnecting...")
+                          try {
+                            await execAsync(["nmcli", "connection", "down", "id", ap.ssid])
+                            setStatusText("Disconnected")
+                            setSelectedAp(null)
+                          } catch (err: any) {
+                            console.error("Failed to disconnect from wifi", err)
+                            setStatusText("Failed to disconnect")
+                          }
+                        }}
+                      />
+                      <button
                         class="wifi-dialog-btn connect"
                         label="Connect"
+                        visible={createComputed(() => !isConnected())}
                         onClicked={async () => {
                           setStatusText("Connecting...")
                           try {
@@ -408,8 +445,8 @@ export function SystemStatus() {
                     <label
                       label={statusText}
                       visible={createComputed(() => statusText() !== "")}
-                      css="color: #a78bfa; font-size: 11px;"
                       halign={Gtk.Align.START}
+                      class="sys-status-msg"
                     />
                   </box>
                 )
@@ -469,8 +506,8 @@ export function SystemStatus() {
           >
             <label
               label="Power Profiles"
-              css="font-weight: bold; font-size: 14px;"
               halign={Gtk.Align.START}
+              class="sys-title"
             />
             <box css="background-color: rgba(255, 255, 255, 0.1); min-height: 1px;" />
             <box orientation={Gtk.Orientation.VERTICAL} spacing={4}>
@@ -490,7 +527,7 @@ export function SystemStatus() {
                   >
                     <box spacing={8} valign={Gtk.Align.CENTER}>
                       <label label={profile.icon} css="color: #94a3b8;" />
-                      <label label={profile.name} hexpand halign={Gtk.Align.START} />
+                      <label label={profile.name} hexpand halign={Gtk.Align.START} class="sys-text" />
                       <label label="" visible={isActive} css="color: #34d399;" />
                     </box>
                   </button>
@@ -501,8 +538,8 @@ export function SystemStatus() {
         </popover>
       </menubutton>
 
-      <menubutton class="status-item power-btn" tooltipText="Power Options">
-        <label label="" />
+      <menubutton class="status-item power-btn" tooltipText="Power Options" alwaysShowArrow={false}>
+        <label label="" halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER} />
         <popover>
           <box
             orientation={Gtk.Orientation.VERTICAL}
@@ -515,7 +552,7 @@ export function SystemStatus() {
             >
               <box spacing={8} valign={Gtk.Align.CENTER}>
                 <label label="" css="color: #ff7a7a;" />
-                <label label="Shut Down" hexpand halign={Gtk.Align.START} />
+                <label label="Shut Down" hexpand halign={Gtk.Align.START} class="sys-text" />
               </box>
             </button>
             <button
@@ -524,7 +561,7 @@ export function SystemStatus() {
             >
               <box spacing={8} valign={Gtk.Align.CENTER}>
                 <label label="" css="color: #fb923c;" />
-                <label label="Restart" hexpand halign={Gtk.Align.START} />
+                <label label="Restart" hexpand halign={Gtk.Align.START} class="sys-text" />
               </box>
             </button>
             <button
@@ -533,7 +570,7 @@ export function SystemStatus() {
             >
               <box spacing={8} valign={Gtk.Align.CENTER}>
                 <label label="" css="color: #a78bfa;" />
-                <label label="Sleep" hexpand halign={Gtk.Align.START} />
+                <label label="Sleep" hexpand halign={Gtk.Align.START} class="sys-text" />
               </box>
             </button>
             <button
@@ -542,7 +579,7 @@ export function SystemStatus() {
             >
               <box spacing={8} valign={Gtk.Align.CENTER}>
                 <label label="󰍃" css="color: #34d399;" />
-                <label label="Log Out" hexpand halign={Gtk.Align.START} />
+                <label label="Log Out" hexpand halign={Gtk.Align.START} class="sys-text" />
               </box>
             </button>
           </box>

@@ -10,12 +10,13 @@ $border-glow: rgba(255, 255, 255, 0.15); // Monochromatic glow highlight
 // ===================================================
 
 // --- OPTION 1: True Monochrome (Active) ---
-$fg-main: #e0e0e0;                     // Light grey text
-$fg-muted: #707070;                    // Inactive icons / Power button
+$fg-main: #cecece;                     // Light grey text
+$fg-sys-status: #0c0c0e;               // Periwinkle blue for system status text
+$fg-muted: #000000;                    // Inactive icons / Power button
 $accent-violet: #ffffff;               // Active workspace (pure white)
 $accent-green: #ffffff;                // Audio slider fill (pure white)
 $accent-orange: #e0e0e0;               // Battery normal
-$accent-red: #707070;                  // Power/Alert muted slate
+$accent-red: #e06c75;                  // Power/Alert toned-down red
 $trough-bg: rgba(58, 58, 58, 0.5);     // Dark charcoal hollow slot
 
 // --- OPTION 2: Sage & Stone ---
@@ -154,6 +155,31 @@ window.Bar {
       min-height: 28px;
       padding: 0 8px;
       transition: all 0.2s ease;
+
+      &.wifi, &.power-btn {
+        padding: 0;
+
+        button {
+          padding: 0 8px;
+          margin: 0;
+          min-width: 28px;
+          min-height: 28px;
+
+          label {
+            margin: 0;
+            padding: 0;
+          }
+
+          arrow {
+            min-width: 0;
+            min-height: 0;
+            padding: 0;
+            margin: 0;
+            -gtk-icon-source: none;
+            opacity: 0;
+          }
+        }
+      }
 
       // Reset internal button for menubutton components
       button {
@@ -341,7 +367,7 @@ popover {
     }
   }
 
-  .wifi-ap-row, .profile-row, .power-menu-item {
+  .profile-row, .power-menu-item {
     background: transparent;
     border: none;
     border-radius: 6px;
@@ -351,6 +377,21 @@ popover {
 
     &:hover {
       background: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  button.wifi-ap-row {
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-style: solid;
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: $fg-main;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
     }
   }
 
@@ -398,25 +439,71 @@ popover {
   }
 
   switch {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 99px;
-    border: 1px solid $border-color;
-    min-height: 18px;
-    min-width: 36px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    min-height: 22px;
+    min-width: 44px;
+    transition: all 0.2s ease;
 
     slider {
-      background: $fg-muted;
+      background: #d0d0d0;
       border-radius: 99px;
-      min-height: 14px;
-      min-width: 14px;
+      min-height: 16px;
+      min-width: 16px;
       margin: 2px;
+      transition: all 0.2s ease;
     }
 
     &:checked {
       background: $accent-violet;
+      border-color: $accent-violet;
+      
       slider {
-        background: #000000;
+        background: #0f0f19;
       }
     }
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+  }
+}
+
+// SystemStatus.tsx text style classes
+.sys-text {
+  color: $fg-sys-status;
+  
+  &.font-medium {
+    font-weight: 500;
+  }
+}
+
+.sys-title {
+  color: $fg-sys-status;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.sys-text-muted {
+  color: rgba($fg-sys-status, 0.6);
+  padding: 8px;
+}
+
+.sys-status-msg {
+  color: $fg-sys-status;
+  font-size: 11px;
+}
+
+// SystemStatus.tsx specific popover styling override
+.sys-status-group popover {
+  .wifi-dialog-btn {
+    &.cancel, &.disconnect {
+      color: $fg-sys-status;
+    }
+  }
+
+  entry {
+    color: $fg-sys-status;
   }
 }
