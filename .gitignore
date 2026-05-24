@@ -1,0 +1,16 @@
+# Dependency directories
+node_modules/
+@girs/
+
+# Environment files
+.env
+.env.*
+
+# Logs
+log.txt
+*.log
+
+# Tooling/Agent outputs
+.agents/
+.codex/
+.understand-anything/

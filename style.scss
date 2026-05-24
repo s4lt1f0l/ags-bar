@@ -1,0 +1,422 @@
+// Custom Design System Tokens (Layout)
+$bg-bar: transparent; // Fully transparent bar background
+$bg-pill: rgba(255, 255, 255, 0.03); // Very subtle glassmorphic fill
+$bg-pill-hover: rgba(255, 255, 255, 0.12); // Hover state highlight
+$border-color: rgba(255, 255, 255, 0.04); // Sleek subtle border line
+$border-glow: rgba(255, 255, 255, 0.15); // Monochromatic glow highlight
+
+// ===================================================
+// COLOR SCHEMES (Options 1, 2, 3, 4)
+// ===================================================
+
+// --- OPTION 1: True Monochrome (Active) ---
+$fg-main: #e0e0e0;                     // Light grey text
+$fg-muted: #707070;                    // Inactive icons / Power button
+$accent-violet: #ffffff;               // Active workspace (pure white)
+$accent-green: #ffffff;                // Audio slider fill (pure white)
+$accent-orange: #e0e0e0;               // Battery normal
+$accent-red: #707070;                  // Power/Alert muted slate
+$trough-bg: rgba(58, 58, 58, 0.5);     // Dark charcoal hollow slot
+
+// --- OPTION 2: Sage & Stone ---
+// $fg-main: #a8a49e;                  // Clay grey
+// $fg-muted: #4a4c4e;                  // River rock grey
+// $accent-violet: #a3b19b;            // Desaturated sage
+// $accent-green: #c5c1bb;             // Warm putty grey
+// $accent-orange: #a8a49e;
+// $accent-red: #6b6c6d;
+// $trough-bg: rgba(74, 76, 78, 0.5);
+
+// Global Bar Container
+window.Bar {
+  background: $bg-bar;
+  color: $fg-main;
+  font-family: "JetBrainsMono Nerd Font", "JetBrainsMono NF", monospace;
+  font-size: 13px;
+  border-bottom: 1px solid transparent;
+  box-shadow: none;
+
+  // Centerbox splits Left, Center, Right zones
+  > centerbox {
+    padding: 0 16px;
+    min-height: 40px;
+  }
+
+  // Common Pill Structure
+  .pill {
+    background: $bg-pill;
+    border: 1px solid $border-color;
+    border-radius: 99px;
+    padding: 4px 14px;
+    margin: 4px 6px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      background: $bg-pill-hover;
+      border-color: rgba(167, 139, 250, 0.4);
+      box-shadow: 0 0 10px rgba(167, 139, 250, 0.15);
+    }
+  }
+
+  // LEFT ZONE
+  .workspaces {
+    background: $bg-pill;
+    border: 1px solid $border-color;
+    border-radius: 99px;
+    padding: 4px 10px;
+    margin: 4px 6px;
+
+    button {
+      background: transparent;
+      border: none;
+      color: $fg-muted;
+      padding: 0 6px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      min-width: 24px;
+      min-height: 24px;
+      border-radius: 99px;
+
+      &.active {
+        color: $accent-violet;
+        text-shadow: 0 0 8px rgba(167, 139, 250, 0.6);
+        background: rgba(167, 139, 250, 0.15);
+      }
+
+      &.occupied {
+        color: $fg-main;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: $fg-main;
+      }
+    }
+  }
+
+  .window-title {
+    color: $fg-main;
+    font-weight: 500;
+    margin-left: 8px;
+    font-size: 12px;
+
+    .icon {
+      color: $accent-violet;
+      margin-right: 6px;
+    }
+  }
+
+  // CENTER ZONE
+  .clock-container {
+    background: $bg-pill;
+    border: 1px solid $border-color;
+    border-radius: 99px;
+    padding: 4px 18px;
+    margin: 4px 0;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: $bg-pill-hover;
+      border-color: rgba(167, 139, 250, 0.4);
+      box-shadow: 0 0 10px rgba(167, 139, 250, 0.15);
+    }
+  }
+  .clock-pill {
+    color: $fg-main;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+
+    button {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+
+      &:hover {
+        background: transparent;
+      }
+    }
+  }
+
+  // RIGHT ZONE
+  .sys-status-group {
+    background: $bg-pill;
+    border: 1px solid $border-color;
+    border-radius: 99px;
+    padding: 2px 8px;
+    margin: 4px 6px;
+
+    .status-item {
+      background: transparent;
+      border: none;
+      border-radius: 99px;
+      min-height: 28px;
+      padding: 0 8px;
+      transition: all 0.2s ease;
+
+      // Reset internal button for menubutton components
+      button {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+
+        &:hover {
+          background: transparent;
+        }
+      }
+
+      > box {
+        min-height: 28px;
+      }
+
+      label {
+        min-height: 28px;
+        line-height: 28px;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      &.wifi {
+        border: 1px solid transparent;
+
+        &.connected {
+          background: transparent;
+          border-color: transparent;
+          color: $fg-main;
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.08);
+          }
+        }
+
+        &.disconnected {
+          background: transparent;
+          border-color: transparent;
+          color: $fg-muted;
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.08);
+          }
+        }
+      }
+
+      &.volume {
+        color: $accent-green;
+        &.muted {
+          color: $fg-muted;
+        }
+      }
+
+      &.battery {
+        color: $accent-orange;
+        &.charging {
+          color: $accent-green;
+        }
+        &.low {
+          color: $accent-red;
+        }
+
+        label {
+          margin: 0 2px;
+        }
+      }
+
+      &.power-btn {
+        color: $accent-red;
+
+        &:hover {
+          background: rgba(255, 122, 122, 0.15);
+        }
+      }
+    }
+
+    .volume-control {
+      min-height: 28px;
+      padding: 0 4px;
+
+      .volume-icon-btn {
+        background: transparent;
+        border: none;
+        color: $accent-green;
+        padding: 0 4px;
+        min-height: 28px;
+        border-radius: 99px;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.08);
+        }
+
+        &.muted {
+          color: $fg-muted;
+        }
+      }
+
+      .volume-slider {
+        min-width: 80px;
+        margin-left: 4px;
+
+        trough {
+          background: $trough-bg;
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 99px;
+          min-height: 6px;
+        }
+
+        highlight {
+          background: $accent-green;
+          border-radius: 99px;
+        }
+
+        slider {
+          background: $fg-main;
+          border-radius: 99px;
+          min-height: 12px;
+          min-width: 12px;
+          margin: -3px 0;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+          border: 1px solid rgba(20, 20, 30, 0.6);
+
+          &:hover {
+            background: #ffffff;
+            box-shadow: 0 0 6px rgba(52, 211, 153, 0.6);
+            border-color: $accent-green;
+          }
+        }
+      }
+    }
+  }
+
+  // System Tray / Process Tray
+  .system-tray {
+    background: $bg-pill;
+    border: 1px solid $border-color;
+    border-radius: 99px;
+    padding: 2px 8px;
+    margin: 4px 6px;
+
+    .tray-item {
+      background: transparent;
+      border: none;
+      color: $fg-muted;
+      padding: 2px 6px;
+      font-size: 14px;
+      border-radius: 99px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: $fg-main;
+      }
+
+      &.active {
+        color: $accent-violet;
+      }
+    }
+  }
+}
+
+// Popover Styling (Calendar, Volume Slider, etc.)
+popover {
+  background: rgba(15, 15, 25, 0.95);
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  padding: 8px;
+  color: $fg-main;
+
+  calendar {
+    background: transparent;
+    color: $fg-main;
+    border: none;
+
+    &:selected {
+      background: $accent-violet;
+      color: #000000;
+      border-radius: 6px;
+    }
+  }
+
+  .wifi-ap-row, .profile-row, .power-menu-item {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: $fg-main;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  .wifi-dialog-btn {
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+
+    &.cancel {
+      background: rgba(255, 255, 255, 0.1);
+      color: $fg-main;
+      &:hover {
+        background: rgba(255, 255, 255, 0.18);
+      }
+    }
+
+    &.connect {
+      background: $accent-violet;
+      color: #000000;
+      &:hover {
+        background: #c084fc;
+        box-shadow: 0 0 10px rgba(167, 139, 250, 0.4);
+      }
+    }
+  }
+
+  entry {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid $border-color;
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: $fg-main;
+    font-size: 13px;
+
+    &:focus {
+      border-color: $accent-violet;
+      box-shadow: 0 0 8px rgba(167, 139, 250, 0.35);
+    }
+
+    placeholder {
+      color: $fg-muted;
+    }
+  }
+
+  switch {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 99px;
+    border: 1px solid $border-color;
+    min-height: 18px;
+    min-width: 36px;
+
+    slider {
+      background: $fg-muted;
+      border-radius: 99px;
+      min-height: 14px;
+      min-width: 14px;
+      margin: 2px;
+    }
+
+    &:checked {
+      background: $accent-violet;
+      slider {
+        background: #000000;
+      }
+    }
+  }
+}
